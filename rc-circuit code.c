@@ -1,7 +1,4 @@
-    /*  Arduino DC Motor Control - PWM | H-Bridge | L298N
-             Example 02 - Arduino Robot Car Control
-        by Dejan Nedelkovski, www.HowToMechatronics.com
-    */
+
     #define enA 9
     #define in1 4
     #define in2 5
