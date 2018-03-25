@@ -6,8 +6,8 @@
 #define M3B 50
 #define M4F 48
 #define M4B 46
-const int Trigpin = 9;
-const int Echopin = 10; 
+int Trigpin = 44;
+int Echopin = 45; 
 long duration ; 
 long distance ; 
 int state =0;
@@ -45,15 +45,15 @@ if (Serial3.available ()>0)
    state = Serial3.read();
 if ( distance <=5 ){
    /*------------------OBSTACLEAVOIDING---------------*/
-    digitalWrite(M1F,LOW);
+    digitalWrite(M1F,HIGH);
     digitalWrite(M1B,LOW);
     digitalWrite(M2F,LOW);
-    digitalWrite(M2B,LOW);
+    digitalWrite(M2B,HIGH);
     digitalWrite(M3F,LOW);
-    digitalWrite(M3B,LOW);
-    digitalWrite(M4F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,HIGH);
     digitalWrite(M4B,LOW);
-    state=0;  
+    state=0;
 }
  
 else 
