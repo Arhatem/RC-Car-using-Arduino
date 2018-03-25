@@ -43,7 +43,7 @@ distance = duration * 0.034/2 ;
 
 if (Serial3.available ()>0)  
    state = Serial3.read();
-if ( distance <=5 ){
+if ( distance <=20 ){
    /*------------------OBSTACLEAVOIDING---------------*/
     digitalWrite(M1F,HIGH);
     digitalWrite(M1B,LOW);
@@ -52,6 +52,16 @@ if ( distance <=5 ){
     digitalWrite(M3F,LOW);
     digitalWrite(M3B,HIGH);
     digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    state=0;
+    delay(1500);
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
     digitalWrite(M4B,LOW);
     state=0;
 }
