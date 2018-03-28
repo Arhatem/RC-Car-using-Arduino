@@ -115,6 +115,8 @@ if (distance <=20){
     while(distance <=20){
          right ();
     }
+  right ();
+  delay(1500);
   STOP();
 }
 
