@@ -1,3 +1,4 @@
+
 /*i Dont know the input pins*/
 
 int M0 = 10;    //Declaration of the sensor input pin
@@ -26,5 +27,38 @@ bool valR2 = digitalRead (R2);
 bool valL1 = digitalRead (L1);
 bool valL2 = digitalRead (L2);
 
+ if(valM0 == HIGH) {
+      forward ();
+      delay(500);
+ }
+ else
+   {
+     if(valR1 == HIGH) {
+       right();
+       delay(500);
+     }
+     
+     else if(valL1 == HIGH) {
+       left();
+       delay(500);
+     }
+     
+     else if(valR2 == HIGH) {
+       right();
+       delay(500);
+     }
+     
+     else if(valL2 == HIGH) {
+       left();
+       delay(500);
+     }
+     
+     else {
+       backward();
+       delay(500);
+     }
+     
+     
+   }
  
 }
