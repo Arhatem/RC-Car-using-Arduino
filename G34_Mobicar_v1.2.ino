@@ -6,6 +6,12 @@
 #define M3B 50
 #define M4F 48
 #define M4B 46
+
+#define M1EN 2
+#define M2EN 3
+#define M3EN 5
+#define M4EN 4
+
 int Trigpin = 44;
 int Echopin = 45; 
 long duration ; 
@@ -21,6 +27,10 @@ void forward (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,HIGH);
     digitalWrite(M4B,LOW);
+    analogWrite(M1EN,255);
+    analogWrite(M2EN,255);
+    analogWrite(M3EN,255);
+    analogWrite(M4EN,255);
     state=0;
 }
 
@@ -34,6 +44,10 @@ void backward (){
     digitalWrite(M3B,HIGH);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,255);
+    analogWrite(M2EN,255);
+    analogWrite(M3EN,255);
+    analogWrite(M4EN,255);
     state=0;
 }
 /*---------------stop function---------------------*/
@@ -46,6 +60,10 @@ void STOP (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,LOW);
+    analogWrite(M1EN,0);
+    analogWrite(M2EN,0);
+    analogWrite(M3EN,0);
+    analogWrite(M4EN,0);
     state=0;
 }
 /*---------------left function---------------------*/
@@ -58,6 +76,10 @@ void left (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,255);
+    analogWrite(M2EN,255);
+    analogWrite(M3EN,255);
+    analogWrite(M4EN,255);
     state=0;
 }
 /*---------------right function---------------------*/
@@ -70,6 +92,10 @@ void right (){
     digitalWrite(M3B,HIGH);
     digitalWrite(M4F,HIGH);
     digitalWrite(M4B,LOW);
+    analogWrite(M1EN,255);
+    analogWrite(M2EN,255);
+    analogWrite(M3EN,255);
+    analogWrite(M4EN,255);
     state=0;
 }
 /*--------------------------USR---------------------*/
