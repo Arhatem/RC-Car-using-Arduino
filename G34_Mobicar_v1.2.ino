@@ -11,6 +11,8 @@
 #define M2EN 3
 #define M3EN 5
 #define M4EN 4
+const int hv=255;
+const int lv=0;
 
 int Trigpin = 44;
 int Echopin = 45; 
@@ -27,12 +29,46 @@ void forward (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,HIGH);
     digitalWrite(M4B,LOW);
-    analogWrite(M1EN,255);
-    analogWrite(M2EN,255);
-    analogWrite(M3EN,255);
-    analogWrite(M4EN,255);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
     state=0;
 }
+/*---------------forward left function---------------------*/
+void forwardLeft (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    
+    state=0;
+}
+/*---------------backwardLeft function------------------*/
+void backwardLeft (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    state=0;
+}
+
 
 /*---------------backward function------------------*/
 void backward (){
@@ -44,10 +80,10 @@ void backward (){
     digitalWrite(M3B,HIGH);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,HIGH);
-    analogWrite(M1EN,255);
-    analogWrite(M2EN,255);
-    analogWrite(M3EN,255);
-    analogWrite(M4EN,255);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
     state=0;
 }
 /*---------------stop function---------------------*/
@@ -60,10 +96,10 @@ void STOP (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,LOW);
-    analogWrite(M1EN,0);
-    analogWrite(M2EN,0);
-    analogWrite(M3EN,0);
-    analogWrite(M4EN,0);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,lv);
     state=0;
 }
 /*---------------left function---------------------*/
@@ -76,10 +112,10 @@ void left (){
     digitalWrite(M3B,LOW);
     digitalWrite(M4F,LOW);
     digitalWrite(M4B,HIGH);
-    analogWrite(M1EN,255);
-    analogWrite(M2EN,255);
-    analogWrite(M3EN,255);
-    analogWrite(M4EN,255);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
     state=0;
 }
 /*---------------right function---------------------*/
@@ -92,10 +128,10 @@ void right (){
     digitalWrite(M3B,HIGH);
     digitalWrite(M4F,HIGH);
     digitalWrite(M4B,LOW);
-    analogWrite(M1EN,255);
-    analogWrite(M2EN,255);
-    analogWrite(M3EN,255);
-    analogWrite(M4EN,255);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
     state=0;
 }
 /*--------------------------USR---------------------*/
@@ -142,7 +178,7 @@ if (distance <=20){
          right ();
     }
   right ();
-  delay(1500);
+  delay(500);
   STOP();
 }
 
@@ -166,6 +202,22 @@ else {
     /*----------------------LEFT--------------------*/
     else if (state == '4') {
         left ();
+    }
+    /*----------------------forwardLEFT--------------------*/
+    else if (state == '7') {
+        forwardLeft ();
+    }
+    /*----------------------forwardRIGHT--------------------*/
+    else if (state == '9') {
+        forwardRight ();
+    }
+    /*----------------------backwardRIGHT--------------------*/
+    else if (state == '3') {
+        backwardRight ();
+    }
+    /*----------------------backwardLEFT--------------------*/
+    else if (state == '1') {
+        backwardLeft ();
     }
 }
 }
