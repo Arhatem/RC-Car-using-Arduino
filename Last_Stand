@@ -12,12 +12,17 @@
 #define M3EN 5
 #define M4EN 4
 
+#define ph1 4
+#define ph2 4
+
 int hv=255;
 int lv=0;
 
 float r ;
 int Lv ;
 int Rv ;
+
+int mov=0 , trn=0 ; //for movement
 
 int Trigpin = 44;
 int Echopin = 45; 
@@ -33,6 +38,78 @@ int L2 = 35;
 
 int lastTurn=0;
 int usa = 0 ;
+
+
+void moveCar(int movement , int turning) //takes percentage of movement and turning the analog stick is reversed in the y direction in the app, up is negative and down is positive
+{  
+  if(movement==0&&turning==0)
+  {
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,lv);
+  }
+  else
+  {
+    int left=0 ,right=0 ;       //speed of each wheel
+    bool forL=LOW , forR=LOW;     //Direction of each wheel
+    if(movement>0)
+    {
+      turning = -1*turning;     //when moving backwards the turning value is reversed
+    }
+    right=turning;          //right = movement+turning
+    left =-1*right;         //left = movement-turning
+    left=left+ movement;      
+    right=right+movement;
+    if (right<0)          //test for negative values to determine direction then make them positive for using
+    {
+      forR=HIGH;
+      right=0-right;
+    } 
+    else forR=LOW;
+    if (left<0)
+    {
+      forL=HIGH;
+      left=0-left;
+    }
+    else forL=LOW;
+
+    digitalWrite(M1F,forR);
+    digitalWrite(M1B,!forR) ;
+    digitalWrite(M2F,forL);
+    digitalWrite(M2B,!forL);
+    digitalWrite(M3F,forL);
+    digitalWrite(M3B,!forL);
+    digitalWrite(M4F,forR);
+    digitalWrite(M4B,!forR);
+
+    if(left<90||right<90)
+    {
+      if(left<90){
+           analogWrite(M2EN,90);
+           analogWrite(M3EN,90);
+        }
+      if(right<90){
+           analogWrite(M1EN,90);
+           analogWrite(M4EN,90);
+        }
+      delay(50);
+    }
+    analogWrite(M1EN,right);
+    analogWrite(M2EN,left);
+    analogWrite(M3EN,left);
+    analogWrite(M4EN,right);
+  }
+}
+
 
 /*---------------forward function------------------*/
 void forward (){
@@ -216,10 +293,12 @@ void forwardLeft (){
      if(valM0 == HIGH){
        if(valR1 == LOW && valL1 == HIGH){  //middle black, left black, right white
         left();
+        lastTurn=2;
         delay(10);    
          }
       else if(valR1 == HIGH && valL1 == LOW){ //middle black, left  white, right black
         right();
+        lastTurn=1;
         delay(10);   
         }
         else{  //middle black,  left and right both in white, go straight
@@ -241,6 +320,7 @@ void forwardLeft (){
         }
       else if(valR1 == HIGH && valL1 == HIGH){//middle white, left  black, right black
         forward ();
+        lastTurn=0;
         delay(10);
         }
         else{//middle white, left and right both in white, stop
@@ -319,7 +399,7 @@ void forwardLeft (){
 
         else {
            STOP();
-        } 
+        }
    }*/
 }
 
@@ -332,22 +412,6 @@ void circle(float x) {
     forward();
     delay(50);
   }
-  
-  /*void infinity(float x) {
-    while(dist<2*3.14*x){
-  float Lv = ((float(x-7.0)/float(x+7.0))*255);
-  float Rv = 255;
-  if ( Lv <= 90){
-    forward();
-  }
-  while(dist<2*3.14*x){
-    float Rv = ((float(x-7.0)/float(x+7.0))*255);
-    float Lv = 255;
-    if ( Rv <= 90){
-    forward();
-    }
-  }
-  }*/
   
 
     digitalWrite(M1F,HIGH);
@@ -412,39 +476,48 @@ if (Serial3.available ())
       break;
       
       case '8' :
-        forward ();
+        //forward ();
+        moveCar(-255,0);
       break;
 
       case '2' :
-        backward();
+        //backward();
+        moveCar(255,0);
       break;
 
       case '0' :
-        STOP ();
+       // STOP ();
+       moveCar(0,0);
       break;
 
       case '6' :
-        right ();
+       // right ();
+       moveCar(0,255);
       break;
 
       case '4' :
-        left ();
+        //left ();
+        moveCar(0,-255);
       break;
 
       case '7' :
-        forwardLeft ();
+        //forwardLeft ();
+        moveCar(-255,-255);
       break;
 
       case '9' :
-        forwardRight ();
+        //forwardRight ();
+        moveCar(-255,255);
       break;
 
       case '3' :
-        backwardRight ();
+        //backwardRight ();
+        moveCar(255,255);
       break;
 
       case '1' :
-        backwardLeft ();
+        //backwardLeft ();
+        moveCar(255,-255);
       break;
 
       case 'O':
