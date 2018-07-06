@@ -1,0 +1,626 @@
+#define M1F 53
+#define M1B 51
+#define M2F 49
+#define M2B 47
+#define M3F 52
+#define M3B 50 
+#define M4F 48
+#define M4B 46
+
+#define M1EN 2
+#define M2EN 3
+#define M3EN 5
+#define M4EN 4
+
+#define ph1 4
+#define ph2 4
+
+int hv=120;
+int lv=0;
+
+float r ;
+int Lv ;
+int Rv ;
+
+int LT = 0;
+int accD = 0;
+
+int sped = 100 ;
+
+int mov=0 , trn=0 ; //for movement
+int lineTrcTurn=0 , turnWeight=0 , lastTurn=0;
+float  turnValue=0; 
+int P=0 , I=0 , D=0 ;   //using the PID method to increase efficiency of line tracking
+float Pweight=6 , Iweight=0.02 , Dweight=27;
+
+int Trigpin = 44;
+int Echopin = 45; 
+long duration ; 
+long distance ; 
+int state =0;
+
+int M0 = 38;    //Declaration of the sensor input pin
+int R1 = 37;
+int R2 = 36;
+int L1 = 34;
+int L2 = 35;
+
+//int lastTurn=0;
+int usa = 0 ;
+
+
+void moveCar(int movement , int turning) //takes percentage of movement and turning the analog stick is reversed in the y direction in the app, up is negative and down is positive
+{  
+  if(movement==0&&turning==0)
+  {
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,lv);
+  }
+  else
+  {
+    int left=0 ,right=0 ;       //speed of each wheel
+    bool forL=LOW , forR=LOW;     //Direction of each wheel
+    if(movement>0)
+    {
+      turning = -1*turning;     //when moving backwards the turning value is reversed
+    }
+    right=turning;          //right = movement+turning
+    left =-1*right;         //left = movement-turning
+    left=left+ movement;      
+    right=right+movement;
+    if (right<0)          //test for negative values to determine direction then make them positive for using
+    {
+      forR=HIGH;
+      right=0-right;
+    } 
+    else forR=LOW;
+    if (left<0)
+    {
+      forL=HIGH;
+      left=0-left;
+    }
+    else forL=LOW;
+
+    digitalWrite(M1F,forR);
+    digitalWrite(M1B,!forR) ;
+    digitalWrite(M2F,forL);
+    digitalWrite(M2B,!forL);
+    digitalWrite(M3F,forL);
+    digitalWrite(M3B,!forL);
+    digitalWrite(M4F,forR);
+    digitalWrite(M4B,!forR);
+
+    if(left<90||right<90)
+    {
+      if(left<90){
+           analogWrite(M2EN,90);
+           analogWrite(M3EN,90);
+        }
+      if(right<90){
+           analogWrite(M1EN,90);
+           analogWrite(M4EN,90);
+        }
+      delay(50);
+    }
+    analogWrite(M1EN,right);
+    analogWrite(M2EN,left);
+    analogWrite(M3EN,left);
+    analogWrite(M4EN,right);
+  }
+}
+
+
+/*---------------forward function------------------*/
+void forward (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------forward left function---------------------*/
+void forwardRight (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    
+    state=0;
+}
+/*---------------backwardRIGHT function------------------*/
+void backwardLeft (){
+     digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------backwardLeft function------------------*/
+void backwardRight (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    state=0;
+}
+
+
+/*---------------backward function------------------*/
+void backward (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------stop function---------------------*/
+void STOP (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,lv);
+    state=0;
+}
+/*---------------left function---------------------*/
+void right (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------right function---------------------*/
+void left (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------forwardRight function---------------------*/
+void forwardLeft (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+
+
+/*--------------------------USR---------------------*/
+    void USR(){
+        digitalWrite(Trigpin , LOW);
+        delayMicroseconds (2);
+        
+        digitalWrite(Trigpin , HIGH );
+        delayMicroseconds (10);
+        digitalWrite(Trigpin , LOW );
+        
+        duration = pulseIn (Echopin , HIGH);
+        distance = duration * 0.034/2 ;
+
+        if (distance <=20){
+          usa = 1;
+          backwardRight ();
+          delay(1000);
+          STOP();
+        }
+
+    }
+
+    void lineTracking() {
+      bool valM0 = digitalRead (M0); //sensor middle   // The current signal of the sensor will be read
+      bool valR1 = digitalRead (R1);  //sensor right
+      bool valL1 = digitalRead (L1);   //sensor left
+     // bool valL2 = digitalRead (L2);
+     // bool valR2 = digitalRead (R2);
+
+
+  /*  if(valM0 == HIGH){
+       if(valR1 == LOW && valL1 == HIGH){  //middle black, left black, right white
+        turnWeight=-2;   
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle black, left  white, right black
+        turnWeight=2; 
+        }
+        else{  //middle black,  left and right both in white, go straight
+           turnWeight=0;   
+          }  
+      }
+      else{// middle sensor in white area
+         if(valR1 == LOW && valL1 == HIGH){  //middle white, left black, right white
+            turnWeight=-4;   
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle white, left  white, right black
+            turnWeight=4;  
+        }
+      else if(valR1 == HIGH && valL1 == HIGH){//middle white, left  black, right black
+            turnWeight=0;   
+
+        }
+        else{//middle white, left and right both in white, stop
+            if(turnWeight==-4||(turnWeight!=4&&D<0)){
+               turnWeight=-5;
+             } 
+       
+            else if(turnWeight==4||D>0){
+               turnWeight=5;
+            }
+          }           
+        }
+    P=turnWeight;                   //the proportional value is the current turn weight based on current sensor reading
+    I=I+turnWeight;                   //the integral value is the accumulation of all the previous turn weights (readings)
+    D=turnWeight-lastTurn;                //the differential value is the difference between current and last turn weights
+    turnValue=(P*Pweight)+(I*Iweight)+(D*Dweight);    //finally the turning value which will control the response of the car is the sum of all values
+    lastTurn=turnWeight;                //each multiplied by their respective weights
+    turnValue=constrain(turnValue,-100,100);
+    moveCar(-100,turnValue);*/
+     
+     //middle sensor in black area
+     if(valM0 == HIGH){
+       if(valR1 == LOW && valL1 == HIGH){  //middle black, left black, right white
+        left();
+        lastTurn=2;
+        delay(10);    
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle black, left  white, right black
+        right();
+        lastTurn=1;
+        delay(10);   
+        }
+        else{  //middle black,  left and right both in white, go straight
+           forward ();
+           lastTurn=0;
+           delay(10);     
+          }  
+      }
+      else{// middle sensor in white area
+         if(valR1 == LOW && valL1 == HIGH){  //middle white, left black, right white
+        left();
+        lastTurn=2;
+        delay(10);    
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle white, left  white, right black
+        right();
+        lastTurn=1;
+        delay(10);   
+        }
+      else if(valR1 == HIGH && valL1 == HIGH){//middle white, left  black, right black
+        forward ();
+        lastTurn=0;
+        delay(10);
+        }
+        else{//middle white, left and right both in white, stop
+           if(lastTurn==0){
+               forward ();
+               delay (10);
+      
+             } 
+       
+            if (lastTurn==1){
+               right ();
+               delay (10);
+        
+            }      
+            else if (lastTurn==2){
+              left ();
+              delay (10);
+           }
+          }           
+        }
+
+    
+
+ /*f(valM0 == HIGH && valR1 == LOW && valL1 == LOW) {
+      forward ();
+      lastTurn=0;
+      delay(10);
+ }
+ else
+   {
+     if(valR1 == HIGH && valM0 == LOW && valL1 == LOW) {
+       right();
+       lastTurn=1;
+       delay(10);
+     }
+     
+     else if(valL1 == HIGH && valM0 == LOW && valR1 == LOW ) {
+       left();
+       lastTurn=2;
+       delay(10);
+     }
+
+     else if(valR1 == HIGH && valM0 == HIGH && valL1 == LOW) {
+       right();
+       lastTurn=1;
+       delay(10);
+     }
+
+     else if(valL1 == HIGH && valM0 == HIGH && valR1 == LOW ) {
+       left();
+       lastTurn=2;
+       delay(10);
+     }
+
+      else if(valM0 == HIGH && valR1 == HIGH && valL1 == HIGH) {
+      forward ();
+      delay(10);
+     }
+
+      else if(valM0 == LOW && valR1 == LOW && valL1 == LOW) {
+        
+           if(lastTurn==0){
+               forward ();
+               delay (10);
+      
+             }       
+            else if (lastTurn==1){
+               right ();
+               delay (10);
+        
+            }      
+            else if (lastTurn==2){
+              left ();
+              delay (10);
+           }
+        }
+
+        else {
+           STOP();
+        }
+   }*/
+}
+
+void circle(float x) {
+  
+  float Lv = ((float(x-7.0)/float(x+7.0))*255);
+  float Rv = 255;
+  
+  if ( Lv <= 90){
+    forward();
+    delay(50);
+  }
+  
+
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,Lv);
+    analogWrite(M2EN,Rv);
+    analogWrite(M3EN,Rv);
+    analogWrite(M4EN,Lv);
+    delay(20000);
+    state=0;
+  }
+     
+
+
+/*===================================================*/
+void setup() {
+  // put your setup code here, to run once:
+pinMode (Trigpin,OUTPUT);
+pinMode (Echopin ,INPUT);
+pinMode(M1F,OUTPUT);
+pinMode(M1B,OUTPUT);
+pinMode(M2F,OUTPUT);
+pinMode(M2B,OUTPUT);
+pinMode(M3F,OUTPUT);
+pinMode(M3B,OUTPUT);
+pinMode(M4F,OUTPUT);
+pinMode(M4B,OUTPUT);
+Serial3.begin(9600);
+
+pinMode (M0, INPUT) ;   // Initialization sensor pin
+pinMode (R1, INPUT) ;
+pinMode (R2, INPUT) ;
+pinMode (L1, INPUT) ;
+pinMode (L2, INPUT) ;
+
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+//USR();
+if ( LT == 1 && accD == 0 ){
+            lineTracking();
+}
+
+if (Serial3.available ())  
+   state = Serial3.read();
+
+   if ( usa == 1 ){
+        USR();
+    }
+
+     if ( LT == 0 && accD == 0){
+        switch(state)
+        {
+
+         case 'U':      //for USR
+         usa = 1 ;
+          break;
+
+         case 'u':      //for USR
+         usa = 0 ;
+          break;
+        
+          case 'L' :
+            LT = 1 ;
+            accD = 0;
+            STOP();
+          break;
+
+          case 'Q' :
+            LT = 0 ;
+            accD = 1;
+            STOP();
+          break;
+          
+          case '8' :
+            //forward ();
+            moveCar(-hv,0);
+          break;
+    
+          case '2' :
+            //backward();
+            moveCar(hv,0);
+          break;
+    
+          case '0' :
+           // STOP ();
+           moveCar(0,0);
+          break;
+    
+          case '6' :
+           // right ();
+           moveCar(0,hv);
+          break;
+    
+          case '4' :
+            //left ();
+            moveCar(0,-hv);
+          break;
+    
+          case '7' :
+            //forwardLeft ();
+            moveCar(-hv,-hv);
+          break;
+    
+          case '9' :
+            //forwardRight ();
+            moveCar(-hv,hv);
+          break;
+    
+          case '3' :
+            //backwardRight ();
+            moveCar(hv,hv);
+          break;
+    
+          case '1' :
+            //backwardLeft ();
+            moveCar(hv,-hv);
+          break;
+
+          /*case 'J' :
+           hv=Serial.parseInt();
+          break;*/
+              }
+     }
+       else if ( LT == 1 && accD == 0 ){
+        switch (state){
+          case 'M':
+            lineTracking();
+            break;
+            
+           case 'R':
+          LT=0;
+          STOP();
+          break;
+        }
+       }
+
+        else if ( LT == 0 && accD == 1 ){
+        switch (state){
+          case 'b':
+          break;
+
+        }
+       }
+
+   else {
+    STOP () ;
+    }
+    
+delay (10);
+
+      
+}
