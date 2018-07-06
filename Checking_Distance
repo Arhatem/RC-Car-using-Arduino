@@ -16,12 +16,14 @@
 #define PhI2 31
 
 #define stepdis     5105 
+int dist = 0;
 
 int hv=150;
 int lv=0;
 int state = 0;
 int i = 0 ;
 int j = 0 ;
+
 
 /*---------------forward function------------------*/
 void forward (){
@@ -171,18 +173,26 @@ void forwardLeft (){
     state=0;
 }
     /*---------***********-------distance--------************------*/
-    
-bool Forward(int dist){
+void line (){
+  forward();
+  long c = count1();
+  if( c == (1000)){
+    STOP();
+  }
 
+  }
+
+    
+bool lin(int dist)
+{
   if(dist==0)return 0;
-  
-    bool st1 =digitalRead(PhI1);
-    bool st2 =digitalRead(PhI2);
-    bool ls1 =st1 , ls2 =st2 ;
+  bool st1 =digitalRead(PhI1);
+  bool st2 =digitalRead(PhI2);
+  bool ls1 =st1 , ls2 =st2;
   
   int i=0 , j=0;
-  forward();
- while((long)(i* stepdis) <((long)dist*10000))
+  forward();;
+  while((long)i* stepdis <(long)dist*10000)
   {
     st1= digitalRead(PhI1);
     st2= digitalRead(PhI2);
@@ -197,35 +207,38 @@ bool Forward(int dist){
       ls2=st2;
     }
   }
-  STOP;
+  STOP();
+
   return 1;
-    }
+}
+      int count1 (){
+      bool st1= digitalRead(PhI1);
+      bool st2= digitalRead(PhI2);
+      bool ls1 =st1 , ls2 =st2;
 
-    int count1 (){
-      bool st1 =0;
-      bool st2 =0;
-
-      forward();
-      st1= digitalRead(PhI1);
-      st2= digitalRead(PhI2);
-      if(st1 == 1)
+       st1= digitalRead(PhI1);
+       st2= digitalRead(PhI2);
+      
+    if((st2&&!ls2)||(!st2&&ls2))
     {
       j++;
+      ls2=st2;
     }
     return j ;
       
       }
 
       int count2 (){
-      bool st1 =0;
-      bool st2 =0;
+       bool st1 =digitalRead(PhI1);
+       bool st2 =digitalRead(PhI2);
+       bool ls1 =st1 , ls2 =st2;
 
-
-      forward();
-      st1= digitalRead(PhI1);
-      st2= digitalRead(PhI2);
-      if(st2 == 1 ){
+       st1= digitalRead(PhI1);
+       st2= digitalRead(PhI2);
+    if((st1&&!ls1)||(!st1&&ls1))
+    {
       i++;
+      ls1=st1;
     }
     return i ;
       }
@@ -257,11 +270,16 @@ Serial.begin(9600);
 void loop() {
   // put your main code here, to run repeatedly:
 int x = count1() ;
+x = x/20 ;  
 int y = count2() ;
-Serial.print(digitalRead(30));
-Serial.print(digitalRead(31));
+//  Serial.print(digitalRead(30));
+//Serial.print(digitalRead(31));
 Serial.print(x);
-Serial.print(y);
+//Serial.print(y);
 Serial.print("\n");
- 
+
+  long c = count1();
+          line ();
+          
+  
 }
