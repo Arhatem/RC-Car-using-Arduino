@@ -216,12 +216,10 @@ void forwardLeft (){
      if(valM0 == HIGH){
        if(valR1 == LOW && valL1 == HIGH){  //middle black, left black, right white
         left();
-        lastTurn=2;
         delay(10);    
          }
       else if(valR1 == HIGH && valL1 == LOW){ //middle black, left  white, right black
         right();
-        lastTurn=1;
         delay(10);   
         }
         else{  //middle black,  left and right both in white, go straight
@@ -243,7 +241,6 @@ void forwardLeft (){
         }
       else if(valR1 == HIGH && valL1 == HIGH){//middle white, left  black, right black
         forward ();
-        lastTurn=0;
         delay(10);
         }
         else{//middle white, left and right both in white, stop
@@ -322,7 +319,7 @@ void forwardLeft (){
 
         else {
            STOP();
-        }
+        } 
    }*/
 }
 
@@ -335,6 +332,22 @@ void circle(float x) {
     forward();
     delay(50);
   }
+  
+  /*void infinity(float x) {
+    while(dist<2*3.14*x){
+  float Lv = ((float(x-7.0)/float(x+7.0))*255);
+  float Rv = 255;
+  if ( Lv <= 90){
+    forward();
+  }
+  while(dist<2*3.14*x){
+    float Rv = ((float(x-7.0)/float(x+7.0))*255);
+    float Lv = 255;
+    if ( Rv <= 90){
+    forward();
+    }
+  }
+  }*/
   
 
     digitalWrite(M1F,HIGH);
