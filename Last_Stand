@@ -3,7 +3,7 @@
 #define M2F 49
 #define M2B 47
 #define M3F 52
-#define M3B 50
+#define M3B 50 
 #define M4F 48
 #define M4B 46
 
@@ -11,26 +11,19 @@
 #define M2EN 3
 #define M3EN 5
 #define M4EN 4
-# define photointerrupter_l 22
-# define photointerrupter_2 23
-# define IN1 2
-# define IN2 3
-# define IN3 4
-# define IN4 7
-# define ENA 5
-# define ENB 6
-# define width_car 15
-const int hv=150;
-const int lv=0;
+
+int hv=255;
+int lv=0;
+
+float r ;
+int Lv ;
+int Rv ;
 
 int Trigpin = 44;
 int Echopin = 45; 
 long duration ; 
 long distance ; 
 int state =0;
-
-int L = 10 ;
-int W = 10 ;
 
 int M0 = 38;    //Declaration of the sensor input pin
 int R1 = 37;
@@ -40,67 +33,6 @@ int L2 = 35;
 
 int lastTurn=0;
 int usa = 0 ;
-bool reverseDirections=0;
-int mov=0 , trn=0 ; //for movement
-
-void moveCar(int movement , int turning) //takes percentage of movement and turning the analog stick is reversed in the y direction in the app, up is negative and down is positive
-{  
-                                     //positive for backward movement and right turning  negative for forward movement and left turning
-  if(movement==0&&turning==0)
-  {
-    digitalWrite(M1F,LOW);
-    digitalWrite(M1B,LOW);
-    digitalWrite(M2F,LOW);
-    digitalWrite(M2B,LOW);
-    digitalWrite(M3F,LOW);
-    digitalWrite(M3B,LOW);
-    digitalWrite(M4F,LOW);
-    digitalWrite(M4B,LOW);
-  }
-  else
-  {
-    int left=0 ,right=0 ;       //speed of each wheel
-    bool forL=LOW , forR=LOW;     //Direction of each wheel
-    if(movement>0)
-    {
-      turning =-1*turning;     //when moving backwards the turning value is reversed
-    }
-    right=turning;
-    left =-1*right;
-    left=left+ movement;      
-    right=right+movement;
-    if (right<0)          //test for negative values to determine direction then make them positive for using
-    {
-      forR=HIGH;
-      right=0-right;
-    } 
-    else forR=LOW;
-    if (left<0)
-    {
-      forL=HIGH;
-      left=0-left;
-    }
-    else forL=LOW;
-
-    right=map(right,0,100,90,255); 
-    left=map(left,0,100,90,255);
-    left=constrain(left,0,255);
-    right=constrain(right,0,255);
-    
-    digitalWrite(M1F,forR);
-    digitalWrite(M1B,!forR);
-    digitalWrite(M2F,forL);
-    digitalWrite(M2B,!forL);
-    digitalWrite(M3F,forL);
-    digitalWrite(M3B,!forL);
-    digitalWrite(M4F,forR);
-    digitalWrite(M4B,!forR);
-    analogWrite(M1EN,right);
-    analogWrite(M2EN,left);
-    analogWrite(M3EN,left);
-    analogWrite(M4EN,right);
-  }
-}
 
 /*---------------forward function------------------*/
 void forward (){
@@ -273,13 +205,68 @@ void forwardLeft (){
     }
 
     void lineTracking() {
-      bool valM0 = digitalRead (M0);    // The current signal of the sensor will be read
-      bool valR1 = digitalRead (R1);
-      bool valR2 = digitalRead (R2);
-      bool valL1 = digitalRead (L1);
-      bool valL2 = digitalRead (L2);
+      bool valM0 = digitalRead (M0); //sensor middle   // The current signal of the sensor will be read
+      bool valR1 = digitalRead (R1);  //sensor right
+      bool valL1 = digitalRead (L1);   //sensor left
+     // bool valL2 = digitalRead (L2);
+     // bool valR2 = digitalRead (R2);
 
- if(valM0 == HIGH && valR1 == LOW && valL1 == LOW) {
+     
+     //middle sensor in black area
+     if(valM0 == HIGH){
+       if(valR1 == LOW && valL1 == HIGH){  //middle black, left black, right white
+        left();
+        lastTurn=2;
+        delay(10);    
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle black, left  white, right black
+        right();
+        lastTurn=1;
+        delay(10);   
+        }
+        else{  //middle black,  left and right both in white, go straight
+           forward ();
+           lastTurn=0;
+           delay(10);     
+          }  
+      }
+      else{// middle sensor in white area
+         if(valR1 == LOW && valL1 == HIGH){  //middle white, left black, right white
+        left();
+        lastTurn=2;
+        delay(10);    
+         }
+      else if(valR1 == HIGH && valL1 == LOW){ //middle white, left  white, right black
+        right();
+        lastTurn=1;
+        delay(10);   
+        }
+      else if(valR1 == HIGH && valL1 == HIGH){//middle white, left  black, right black
+        forward ();
+        lastTurn=0;
+        delay(10);
+        }
+        else{//middle white, left and right both in white, stop
+            if(lastTurn==0){
+               forward ();
+               delay (10);
+      
+             }       
+            else if (lastTurn==1){
+               right ();
+               delay (10);
+        
+            }      
+            else if (lastTurn==2){
+              left ();
+              delay (10);
+           }
+          }           
+        }
+
+    
+
+ /*if(valM0 == HIGH && valR1 == LOW && valL1 == LOW) {
       forward ();
       lastTurn=0;
       delay(10);
@@ -336,12 +323,36 @@ void forwardLeft (){
         else {
            STOP();
         }
-   }
+   }*/
 }
+
+void circle(float x) {
+  
+  float Lv = ((float(x-7.0)/float(x+7.0))*255);
+  float Rv = 255;
+  
+  if ( Lv <= 90){
+    forward();
+    delay(50);
+  }
+  
+
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,Lv);
+    analogWrite(M2EN,Rv);
+    analogWrite(M3EN,Rv);
+    analogWrite(M4EN,Lv);
+    delay(20000);
+    state=0;
+  }
      
-void forward(int dist);    //distance in cm
-void turn(int angle);     //angle in degrees
-void drive_rect(int length , int width);    //length and width in cm
 
 
 /*===================================================*/
@@ -364,14 +375,7 @@ pinMode (R1, INPUT) ;
 pinMode (R2, INPUT) ;
 pinMode (L1, INPUT) ;
 pinMode (L2, INPUT) ;
-pinMode(photointerrupter_l,INPUT);
-  pinMode(photointerrupter_2,INPUT);
-  pinMode(IN1,OUTPUT);
-  pinMode(IN2,OUTPUT);
-  pinMode(IN3,OUTPUT);
-  pinMode(IN4,OUTPUT);
-  pinMode(ENA,OUTPUT);
-  pinMode(ENB,OUTPUT);
+
 }
 
 
@@ -388,18 +392,10 @@ if (Serial3.available ())
    {
     switch(state)
     {
-      case 'X' :    //the analog pad reading send   X....Y....
-          trn=Serial.parseInt();
-          state=Serial.read();
-          if(state=='Y')
-          {
-            mov=Serial.parseInt();
-            moveCar(mov,trn);
-          }
-        break;
-
       case 'L' :
+        hv = 100 ;
         lineTracking();
+        hv = 255 ;
       break;
       
       case '8' :
@@ -438,97 +434,17 @@ if (Serial3.available ())
         backwardLeft ();
       break;
 
-      case 'M':
-       L = Serial.parseInt();
-      if ( state == 'N'){
-       W = Serial.parseInt() ;
-        drive_rect( L , W );
-        }
+      case 'O':
+      int r = Serial.parseInt();
+       circle(r) ;
       break;
 
-      case 'H':
-       int d = Serial.parseInt();
-       Forward(d) ;
-      break;
-
-
-      }
+   }
    }
    else {
     STOP () ;
     }
 delay (10);
 
-//drive_rect();
-}
-void Forward(int dist)
-{
-  bool flag=digitalRead(photointerrupter_l);
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,HIGH);
-  digitalWrite(IN4,LOW);
-  analogWrite(ENA,255);
-  analogWrite(ENB,255);
-  for (int i=0;i<dist;)
-  {
-    if(digitalRead(photointerrupter_l)&&!flag)
-    {
-      i++;
-      flag=1;
-    }
-    if(!digitalRead(photointerrupter_l))
-    {
-      flag=0;
-    }
-  }
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,LOW);
-  analogWrite(ENA,0);
-  analogWrite(ENB,0);
-  
-}
-void turn(int angle)
-{
-  float dist=(float)angle*3.1415926535*width_car/360.0;
-  bool flag=digitalRead(photointerrupter_l);
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,HIGH);
-  analogWrite(ENA,255);
-  analogWrite(ENB,255);
-  for (int i=0;i<dist;)
-  {
-    if(digitalRead(photointerrupter_l)&&!flag)
-    {
-      i++;
-      flag=1;
-    }
-    if(!digitalRead(photointerrupter_l))
-    {
-      flag=0;
-    }
-  }
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,LOW);
-  analogWrite(ENA,0);
-  analogWrite(ENB,0);
-  
-}
-void drive_rect(int length , int width)
-{
-  forward(length);
-  turn(90);
-  forward(width);
-  turn(90);
-  forward(length);
-  turn(90);
-  forward(width);
-  turn(90);
       
 }
