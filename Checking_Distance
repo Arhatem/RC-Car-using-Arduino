@@ -1,0 +1,267 @@
+#define M1F 53
+#define M1B 51
+#define M2F 49
+#define M2B 47
+#define M3F 52
+#define M3B 50
+#define M4F 48
+#define M4B 46
+
+#define M1EN 2
+#define M2EN 3
+#define M3EN 5
+#define M4EN 4
+
+#define PhI1 30
+#define PhI2 31
+
+#define stepdis     5105 
+
+int hv=150;
+int lv=0;
+int state = 0;
+int i = 0 ;
+int j = 0 ;
+
+/*---------------forward function------------------*/
+void forward (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW) ;
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------forward left function---------------------*/
+void forwardRight (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    
+    state=0;
+}
+/*---------------backwardRIGHT function------------------*/
+void backwardLeft (){
+     digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------backwardLeft function------------------*/
+void backwardRight (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,lv);
+    state=0;
+}
+
+
+/*---------------backward function------------------*/
+void backward (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------stop function---------------------*/
+void STOP (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,lv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,lv);
+    state=0;
+}
+/*---------------left function---------------------*/
+void right (){
+    digitalWrite(M1F,LOW);
+    digitalWrite(M1B,HIGH);
+    digitalWrite(M2F,HIGH);
+    digitalWrite(M2B,LOW);
+    digitalWrite(M3F,HIGH);
+    digitalWrite(M3B,LOW);
+    digitalWrite(M4F,LOW);
+    digitalWrite(M4B,HIGH);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------right function---------------------*/
+void left (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,hv);
+    analogWrite(M3EN,hv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+/*---------------forwardRight function---------------------*/
+void forwardLeft (){
+    digitalWrite(M1F,HIGH);
+    digitalWrite(M1B,LOW);
+    digitalWrite(M2F,LOW);
+    digitalWrite(M2B,HIGH);
+    digitalWrite(M3F,LOW);
+    digitalWrite(M3B,HIGH);
+    digitalWrite(M4F,HIGH);
+    digitalWrite(M4B,LOW);
+    analogWrite(M1EN,hv);
+    analogWrite(M2EN,lv);
+    analogWrite(M3EN,lv);
+    analogWrite(M4EN,hv);
+    state=0;
+}
+    /*---------***********-------distance--------************------*/
+    
+bool Forward(int dist){
+
+  if(dist==0)return 0;
+  
+    bool st1 =digitalRead(PhI1);
+    bool st2 =digitalRead(PhI2);
+    bool ls1 =st1 , ls2 =st2 ;
+  
+  int i=0 , j=0;
+  forward();
+ while((long)(i* stepdis) <((long)dist*10000))
+  {
+    st1= digitalRead(PhI1);
+    st2= digitalRead(PhI2);
+    if((st1&&!ls1)||(!st1&&ls1))
+    {
+      i++;
+      ls1=st1;
+    }
+    if((st2&&!ls2)||(!st2&&ls2))
+    {
+      j++;
+      ls2=st2;
+    }
+  }
+  STOP;
+  return 1;
+    }
+
+    int count1 (){
+      bool st1 =0;
+      bool st2 =0;
+
+      forward();
+      st1= digitalRead(PhI1);
+      st2= digitalRead(PhI2);
+      if(st1 == 1)
+    {
+      j++;
+    }
+    return j ;
+      
+      }
+
+      int count2 (){
+      bool st1 =0;
+      bool st2 =0;
+
+
+      forward();
+      st1= digitalRead(PhI1);
+      st2= digitalRead(PhI2);
+      if(st2 == 1 ){
+      i++;
+    }
+    return i ;
+      }
+/*----------------------------------*/
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+pinMode(M1F,OUTPUT);
+pinMode(M1B,OUTPUT);
+pinMode(M2F,OUTPUT);
+pinMode(M2B,OUTPUT);
+pinMode(M3F,OUTPUT);
+pinMode(M3B,OUTPUT);
+pinMode(M4F,OUTPUT);
+pinMode(M4B,OUTPUT);
+
+pinMode(PhI1,INPUT);
+pinMode(PhI2,INPUT);
+
+
+Serial3.begin(9600);
+Serial.begin(9600);
+
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+int x = count1() ;
+int y = count2() ;
+Serial.print(digitalRead(30));
+Serial.print(digitalRead(31));
+Serial.print(x);
+Serial.print(y);
+Serial.print("\n");
+ 
+}
